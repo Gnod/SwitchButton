@@ -23,8 +23,6 @@ public class SwitchButton extends RelativeLayout {
 	private boolean isRight = false;
 	private OnClickListener mOnClickListener;
 	private String[] mStateHints;
-	private View mViewBgLeft;
-	private int mSwitchBtnHeight;
 
 	public SwitchButton(Context context) {
 		this(context, null);
@@ -39,7 +37,6 @@ public class SwitchButton extends RelativeLayout {
 				R.layout.layout_switch_btn, null);
 
 		mViewBg = view.findViewById(R.id.view_switch_bg);
-		mViewBgLeft = view.findViewById(R.id.view_switch_bg_left);
 		mViewSwitchPoint = (ImageView) view
 				.findViewById(R.id.view_switch_image);
 		mViewHint = (TextView) view.findViewById(R.id.view_switch_text);
@@ -50,14 +47,8 @@ public class SwitchButton extends RelativeLayout {
 		mSwitchPointSize = mViewSwitchPoint.getMeasuredWidth();
 
 		ViewHelper.measureView(mViewBg);
-		ViewHelper.measureView(mViewBgLeft);
-		mViewBgLeft.getLayoutParams().width = mSwitchPointSize;
-		mViewBgLeft.setVisibility(View.GONE);
 		mSwitchBtnWidth = mViewBg.getMeasuredWidth();
-		mSwitchBtnHeight = mViewBg.getMeasuredHeight();
 
-		getLayoutParams().height = mSwitchBtnHeight;
-		getLayoutParams().width = mSwitchBtnWidth;
 		setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
