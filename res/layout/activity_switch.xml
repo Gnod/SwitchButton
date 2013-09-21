@@ -9,6 +9,7 @@
     >
 
 	<com.example.switchbutton.SwitchButton 
+	    android:id="@+id/btn_switch"
 	    android:layout_width="wrap_content"
 	    android:layout_height="wrap_content"
 	    />

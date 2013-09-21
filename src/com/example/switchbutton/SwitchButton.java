@@ -21,9 +21,24 @@ public class SwitchButton extends RelativeLayout {
 	private int mSwitchBtnWidth;
 
 	private boolean isRight = false;
-	private OnClickListener mOnClickListener;
+	private OnSwitchListener mOnSwitchListener;
 	private String[] mStateHints;
+	private View mFrameView;
 
+	/**
+	 * Listener of SwitchButton.
+	 * 
+	 */
+	public interface OnSwitchListener {
+		/**
+		 * @param v the SwitchButton
+		 * 
+		 * @return if return true, don't forget to use setSwitch method 
+		 * to set the Switch Point position yourself. 
+		 */
+		public boolean onSwitch(SwitchButton v, boolean isRight);
+	}
+	
 	public SwitchButton(Context context) {
 		this(context, null);
 	}
@@ -33,48 +48,58 @@ public class SwitchButton extends RelativeLayout {
 
 		setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.MATCH_PARENT));
-		View view = LayoutInflater.from(context).inflate(
+		mFrameView = LayoutInflater.from(context).inflate(
 				R.layout.layout_switch_btn, null);
 
-		mViewBg = view.findViewById(R.id.view_switch_bg);
-		mViewSwitchPoint = (ImageView) view
+		mViewBg = mFrameView.findViewById(R.id.view_switch_bg);
+		mViewSwitchPoint = (ImageView) mFrameView
 				.findViewById(R.id.view_switch_image);
-		mViewHint = (TextView) view.findViewById(R.id.view_switch_text);
+		mViewHint = (TextView) mFrameView.findViewById(R.id.view_switch_text);
 
-		addView(view);
+		addView(mFrameView);
 		ViewHelper.measureView(this);
+		ViewHelper.measureView(mViewBg);
 		ViewHelper.measureView(mViewSwitchPoint);
+
+		mSwitchBtnWidth = mViewBg.getMeasuredWidth();
 		mSwitchPointSize = mViewSwitchPoint.getMeasuredWidth();
 
-		ViewHelper.measureView(mViewBg);
-		mSwitchBtnWidth = mViewBg.getMeasuredWidth();
-
-		setOnClickListener(new View.OnClickListener() {
+		mFrameView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				isRight = !isRight;
-
-				if (mOnClickListener != null) {
-					mOnClickListener.onClick(SwitchButton.this, isRight);
+				if(mOnSwitchListener != null && mOnSwitchListener.onSwitch(
+						SwitchButton.this, !isRight)){
+					return;
 				}
-
-				Animation anim = getSwitchAnimation(isRight, 200);
-				anim.setDuration(200);
-				mViewSwitchPoint.startAnimation(anim);
+				setSwitch(!isRight);
 			}
 		});
 	}
-
+	
 	public void initSwitchPoint(boolean isRight, String[] stateHints) {
 		mStateHints = stateHints;
-		setSwitchPoint(isRight);
+		setSwitch(isRight, 0);
 	}
 
-	public void setSwitchPoint(boolean isRight) {
-		this.isRight = isRight;
-
-		mViewSwitchPoint.startAnimation(getSwitchAnimation(isRight, 0));
-
+	/**
+	 * see also {@link #setSwitch(boolean, long)}
+	 * 
+	 */
+	public void setSwitch(boolean toRight) {
+		setSwitch(toRight, 200);
+	}
+	
+	/**
+	 * Switch the Position of the SwitchButton's indicate point.
+	 * 
+	 * @param toRight indicate the switch position.
+	 * @param duration the switch animation duration
+	 */
+	public void setSwitch(boolean toRight, long duration) {
+		this.isRight = toRight;
+		Animation anim = getSwitchAnimation(toRight, duration);
+		mViewSwitchPoint.startAnimation(anim);
+		
 		if (mStateHints == null || mStateHints.length == 0) {
 			mViewHint.setText("");
 		} else if (mStateHints.length == 1) {
@@ -83,19 +108,15 @@ public class SwitchButton extends RelativeLayout {
 			mViewHint.setText(mStateHints[isRight ? 1 : 0]);
 		}
 	}
-
-	public boolean isPointRight() {
+	
+	public void setOnSwitchListener(OnSwitchListener l) {
+		mOnSwitchListener = l;
+	}
+	
+	public boolean isOnRight() {
 		return isRight;
 	}
-
-	public void setOnClickListener(OnClickListener l) {
-		mOnClickListener = l;
-	}
-
-	public interface OnClickListener {
-		public void onClick(SwitchButton v, boolean isRight);
-	}
-
+	
 	public Animation getSwitchAnimation(boolean toRight, long durationMillis) {
 
 		TranslateAnimation anim = new TranslateAnimation(toRight ? 0
